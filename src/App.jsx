@@ -68,12 +68,12 @@ function App() {
           <div className="hero-right-block">
             <div className="profile-wrapper">
               <div className="profile-ring" />
-              <img src="/profile.png" alt="Sriram" className="profile-img" />
+              <img src="./profile.png" alt="Sriram" className="profile-img" />
             </div>
             <div className="hero-buttons">
               <a href="https://github.com/SRAM-07" target="_blank" rel="noreferrer" className="btn">GitHub ↗</a>
               <a href="https://www.linkedin.com/in/sriram-m-890b22215/" target="_blank" rel="noreferrer" className="btn">LinkedIn ↗</a>
-              <a href="/resume.pdf" target="_blank" rel="noreferrer" className="btn btn-primary">Resume ↗</a>
+              <a href="./resume.pdf" target="_blank" rel="noreferrer" className="btn btn-primary">Resume ↗</a>
             </div>
           </div>
         </div>
