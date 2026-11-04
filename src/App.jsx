@@ -100,7 +100,10 @@ function App() {
   return (
     <div className="shell">
       <aside className="side">
-        <a href="#" className="name" onClick={go("about")}>Sriram M</a>
+        <a href="#" className="me" onClick={go("about")}>
+          <img src="./profile.png" alt="Sriram M" className="photo" />
+          <span className="name">Sriram M</span>
+        </a>
         <p className="role">Full stack engineer in Bangalore. Java, Spring Boot and React.</p>
 
         <nav className="nav" aria-label="Sections">
