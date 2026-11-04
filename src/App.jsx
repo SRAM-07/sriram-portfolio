@@ -1,148 +1,229 @@
+import { useEffect, useRef, useState } from "react"
 import "./App.css"
+import { career, work, skills, links } from "./content"
+import Terminal from "./Terminal"
+import CaseStudy from "./CaseStudy"
 
-const experience = [
-  {
-    company: "ProDiligix Technologies",
-    role: "Technical Lead, Full Stack",
-    dates: "Jul 2026 to present",
-    points: [
-      "Rebuilding the company's operations portal on Spring Boot, MySQL and React, replacing a legacy Vue and Rails app. It is used every day by clients including HCCB, Rapido and Candescent.",
-      "Built the carrier integrations with Delhivery and Bluedart for booking, labels, live tracking and cancellation.",
-      "Built wallet and purchase order billing with refunds, RTO charges and month end reconciliation.",
-      "Look after security, backups, monitoring and every staging and production release.",
-    ],
-  },
-  {
-    company: "Encora Innovation Labs (now Coforge)",
-    role: "Software Engineer, Backend",
-    dates: "Jun 2024 to Jun 2026",
-    points: [
-      "Built and maintained REST APIs in Java, Spring Boot and Micronaut for Keap and Thryv, including Twilio toll free verification.",
-      "Split a core service so it could be deployed on its own behind a feature flag, with no downtime.",
-      "Maintained a Python ETL pipeline for large MLS real estate datasets in MongoDB.",
-    ],
-  },
-  {
-    company: "Encora Innovation Labs",
-    role: "Backend Intern",
-    dates: "Oct 2023 to Jan 2024",
-    points: ["Wrote price scrapers that fed a Django price comparison app."],
-  },
+const sections = [
+  { id: "about", label: "About" },
+  { id: "career", label: "Career" },
+  { id: "work", label: "Work" },
+  { id: "terminal", label: "Terminal" },
+  { id: "contact", label: "Contact" },
 ]
 
-const projects = [
-  {
-    name: "LLM instruction following benchmark",
-    note: "Kaggle silver medal",
-    text: "A 104 task benchmark that tests how strictly models like Gemini, Claude, Qwen and Gemma follow instructions, scored with a metric I designed for it.",
-  },
-  {
-    name: "Ecompare",
-    note: "Python, Django",
-    text: "A scraper that compares product prices across Amazon and Flipkart.",
-    link: "https://github.com/SRAM-07/ecompare-price-comparison",
-  },
-]
+function readTheme() {
+  try {
+    const saved = localStorage.getItem("theme")
+    if (saved === "light" || saved === "dark") return saved
+  } catch { /* storage blocked */ }
+  return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+}
 
-const skills = [
-  ["Languages", "Java, Python, JavaScript, SQL"],
-  ["Backend", "Spring Boot, Micronaut, REST APIs, Django"],
-  ["Frontend", "React, Tailwind CSS"],
-  ["Databases", "MySQL, PostgreSQL, MongoDB"],
-  ["Cloud and tools", "AWS (EC2, S3, SES), Nginx, Linux, Git, CircleCI"],
-]
+function useHashRoute() {
+  const [hash, setHash] = useState(() => window.location.hash)
+  useEffect(() => {
+    const on = () => setHash(window.location.hash)
+    window.addEventListener("hashchange", on)
+    return () => window.removeEventListener("hashchange", on)
+  }, [])
+  return hash
+}
 
-function Section({ title, children }) {
+function useActiveSection(enabled) {
+  const [active, setActive] = useState("about")
+  useEffect(() => {
+    if (!enabled) return
+    const els = sections.map((s) => document.getElementById(s.id)).filter(Boolean)
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id) })
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    )
+    els.forEach((el) => obs.observe(el))
+    return () => obs.disconnect()
+  }, [enabled])
+  return active
+}
+
+function CareerEvent({ item, open, onToggle }) {
   return (
-    <section className="section">
-      <h2>{title}</h2>
-      {children}
-    </section>
+    <li className={`event ${item.current ? "is-current" : ""} ${open ? "is-open" : ""}`}>
+      <span className="event-dot" aria-hidden="true" />
+      <button className="event-head" onClick={onToggle} aria-expanded={open}>
+        <span className="event-when">{item.when}</span>
+        <span className="event-what">
+          <span className="event-role">{item.role}</span>
+          <span className="event-org">{item.org}</span>
+        </span>
+        {item.current && <span className="tape">Current</span>}
+        <span className="event-toggle" aria-hidden="true">{open ? "Less" : "More"}</span>
+      </button>
+      <div className="event-body" hidden={!open}>
+        <ul>
+          {item.points.map((p) => <li key={p}>{p}</li>)}
+        </ul>
+      </div>
+    </li>
   )
 }
 
 function App() {
+  const [theme, setTheme] = useState(readTheme)
+  const [openEvent, setOpenEvent] = useState(career[0].id)
+  const hash = useHashRoute()
+  const caseSlug = hash.startsWith("#/work/") ? hash.slice(7) : null
+  const caseItem = work.find((w) => w.slug === caseSlug)
+  const active = useActiveSection(!caseItem)
+  const mainRef = useRef(null)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem("theme", theme) } catch { /* storage blocked */ }
+  }, [theme])
+
+  useEffect(() => {
+    if (caseItem) window.scrollTo(0, 0)
+  }, [caseItem])
+
+  const go = (id) => (e) => {
+    e.preventDefault()
+    if (caseItem) {
+      window.location.hash = ""
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }), 30)
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   return (
-    <main className="page">
-      <header className="top">
-        <div className="who">
-          <img src="./profile.png" alt="Sriram M" className="photo" />
-          <div>
-            <h1>Sriram M</h1>
-            <p className="title">Full Stack Engineer</p>
-          </div>
-        </div>
-        <div className="contact">
-          <span>Bangalore, India</span>
-          <a href="mailto:sriramm015@gmail.com">sriramm015@gmail.com</a>
-          <span className="links">
-            <a href="https://github.com/SRAM-07" target="_blank" rel="noreferrer">GitHub</a>
-            <a href="https://www.linkedin.com/in/sriram-m-890b22215/" target="_blank" rel="noreferrer">LinkedIn</a>
-            <a href="./resume.pdf" target="_blank" rel="noreferrer">Resume (PDF)</a>
-          </span>
-        </div>
-      </header>
+    <div className="shell">
+      <aside className="side">
+        <a href="#" className="name" onClick={go("about")}>Sriram M</a>
+        <p className="role">Full stack engineer in Bangalore. Java, Spring Boot and React.</p>
 
-      <p className="about">
-        I build production software end to end, from Spring Boot APIs and MySQL to React frontends running on AWS.
-        I'm currently the technical lead at ProDiligix, where I'm rebuilding the company's logistics operations portal.
-      </p>
-
-      <Section title="Experience">
-        {experience.map((job) => (
-          <div className="job" key={job.company + job.role}>
-            <div className="job-head">
-              <div>
-                <span className="job-role">{job.role}</span>
-                <span className="job-company">{job.company}</span>
-              </div>
-              <span className="job-dates">{job.dates}</span>
-            </div>
-            <ul>
-              {job.points.map((p) => <li key={p}>{p}</li>)}
-            </ul>
-          </div>
-        ))}
-      </Section>
-
-      <Section title="Projects">
-        {projects.map((p) => (
-          <div className="project" key={p.name}>
-            <div className="job-head">
-              <span className="job-role">
-                {p.link ? <a href={p.link} target="_blank" rel="noreferrer">{p.name}</a> : p.name}
-              </span>
-              <span className="job-dates">{p.note}</span>
-            </div>
-            <p>{p.text}</p>
-          </div>
-        ))}
-      </Section>
-
-      <Section title="Skills">
-        <dl className="skills">
-          {skills.map(([k, v]) => (
-            <div key={k}>
-              <dt>{k}</dt>
-              <dd>{v}</dd>
-            </div>
+        <nav className="nav" aria-label="Sections">
+          {sections.map((s) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              onClick={go(s.id)}
+              className={!caseItem && active === s.id ? "active" : ""}
+            >
+              {s.label}
+            </a>
           ))}
-        </dl>
-      </Section>
+        </nav>
 
-      <Section title="Education">
-        <div className="job-head">
-          <div>
-            <span className="job-role">B.Tech, Computer Science</span>
-            <span className="job-company">Dayananda Sagar University</span>
+        <div className="side-foot">
+          <button
+            className="theme-btn"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            <span className="theme-icon" aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+            {theme === "dark" ? "Light mode" : "Dark mode"}
+          </button>
+          <div className="side-links">
+            <a href={links.github} target="_blank" rel="noreferrer">GitHub</a>
+            <a href={links.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href="./resume.pdf" target="_blank" rel="noreferrer">Resume</a>
           </div>
-          <span className="job-dates">2020 to 2024</span>
         </div>
-        <p className="cert">Databricks Certified Data Engineer Associate</p>
-      </Section>
+      </aside>
 
-      <footer className="foot">Last updated November 2026</footer>
-    </main>
+      <main className="main" ref={mainRef}>
+        {caseItem ? (
+          <CaseStudy item={caseItem} />
+        ) : (
+          <>
+            <section id="about" className="block hero">
+              <div className="parcel">
+                <div className="parcel-top">
+                  <span className="parcel-id">SRM-BLR-2020</span>
+                  <span className="tape">In transit</span>
+                </div>
+                <h1>I build the software that moves things.</h1>
+                <p className="lede">
+                  I'm the technical lead at ProDiligix, where I'm rebuilding the operations portal that
+                  books, tracks and bills shipments for clients like HCCB, Rapido and Candescent.
+                  Before that I spent two years building backend APIs at Encora.
+                </p>
+                <dl className="parcel-meta">
+                  <div><dt>Current location</dt><dd>ProDiligix, Bangalore</dd></div>
+                  <div><dt>Experience</dt><dd>2+ years</dd></div>
+                  <div><dt>Carrying</dt><dd>Java, Spring Boot, React, AWS</dd></div>
+                </dl>
+              </div>
+            </section>
+
+            <section id="career" className="block">
+              <h2>Career, tracked</h2>
+              <p className="section-note">Newest scan first. Open any stop to see what I did there.</p>
+              <ol className="track">
+                {career.map((item) => (
+                  <CareerEvent
+                    key={item.id}
+                    item={item}
+                    open={openEvent === item.id}
+                    onToggle={() => setOpenEvent(openEvent === item.id ? null : item.id)}
+                  />
+                ))}
+              </ol>
+            </section>
+
+            <section id="work" className="block">
+              <h2>Selected work</h2>
+              <div className="work">
+                {work.map((w) => (
+                  <a key={w.slug} href={`#/work/${w.slug}`} className="work-item">
+                    <span className="work-kind">{w.kind}</span>
+                    <span className="work-title">{w.title}</span>
+                    <span className="work-sum">{w.summary}</span>
+                    <span className="work-tags">{w.stack.join(", ")}</span>
+                    <span className="work-open">Read the case study</span>
+                  </a>
+                ))}
+              </div>
+              <p className="also">
+                Also built <a href={links.ecompare} target="_blank" rel="noreferrer">Ecompare</a>, a Python
+                scraper that compares prices across Amazon and Flipkart.
+              </p>
+            </section>
+
+            <section id="terminal" className="block">
+              <h2>Ask the terminal</h2>
+              <p className="section-note">Type <code>help</code> to see what it knows.</p>
+              <Terminal setTheme={setTheme} theme={theme} />
+            </section>
+
+            <section id="skills-contact" className="block">
+              <h2>What I work with</h2>
+              <dl className="skills">
+                {skills.map(([k, v]) => (
+                  <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+                ))}
+              </dl>
+            </section>
+
+            <section id="contact" className="block contact">
+              <h2>Get in touch</h2>
+              <p>
+                If you're hiring for backend or full stack work, or want to talk about logistics software,
+                email is the fastest way to reach me.
+              </p>
+              <div className="contact-row">
+                <a className="btn" href={`mailto:${links.email}`}>Email me</a>
+                <span className="mail">{links.email}</span>
+              </div>
+            </section>
+
+            <footer className="foot">Built by Sriram with React. Last updated November 2026.</footer>
+          </>
+        )}
+      </main>
+    </div>
   )
 }
 
