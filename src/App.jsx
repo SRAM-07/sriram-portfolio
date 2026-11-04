@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import "./App.css"
-import { career, work, skills, links, now } from "./content"
+import { career, work, skills, links } from "./content"
 import GitHubActivity from "./GitHubActivity"
 import Terminal from "./Terminal"
 import CaseStudy from "./CaseStudy"
 
 const sections = [
   { id: "about", label: "About" },
-  { id: "now", label: "Now" },
   { id: "career", label: "Career" },
   { id: "work", label: "Work" },
   { id: "github", label: "GitHub" },
@@ -164,15 +163,6 @@ function App() {
               </div>
             </section>
 
-            <section id="now" className="block">
-              <h2>Now</h2>
-              <p className="section-note">What I'm up to this month. Updated {now.updated}.</p>
-              <dl className="now">
-                {now.items.map(([k, v]) => (
-                  <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
-                ))}
-              </dl>
-            </section>
 
             <section id="career" className="block">
               <h2>Career, tracked</h2>
