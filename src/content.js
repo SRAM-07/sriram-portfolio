@@ -116,3 +116,13 @@ export const skills = [
   ["Data", "MySQL, PostgreSQL, MongoDB"],
   ["Cloud and tools", "AWS (EC2, S3, SES), Nginx, Linux, Git, CircleCI"],
 ]
+
+export const now = {
+  updated: "November 2026",
+  items: [
+    ["Building", "Live carrier tracking and daily delivery reports for clients at ProDiligix."],
+    ["Shipped", "HCCB's Diwali gift dispatch: 320+ parcels across Karnataka, Tamil Nadu, Kerala and beyond, tracked end to end."],
+    ["Learning", "Data structures and algorithms in Java, one problem a day."],
+    ["Improving", "This site. It's built in React and deployed on GitHub Pages."],
+  ],
+}
